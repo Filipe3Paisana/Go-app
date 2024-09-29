@@ -4,27 +4,29 @@ FROM golang:1.20-alpine AS builder
 # Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
-
+# Copiar os arquivos de configuração e código
 COPY go.mod ./
 COPY HelloGO.go ./
 COPY RandomNumbers.go ./
+COPY app.go ./
 
-
+# Baixar as dependências
 RUN go mod tidy
 
-
+# Compilar os aplicativos Go
 RUN go build -o exercicio1 HelloGO.go
 RUN go build -o exercicio2 RandomNumbers.go
+RUN go build -o app app.go
 
 # Etapa 2: Executar a aplicação
 FROM alpine:latest
 
-
+# Definir o diretório de trabalho no container final
 WORKDIR /app
 
+# Copiar apenas o binário da aplicação web para o container final
+COPY --from=builder /app/app .
 
-COPY --from=builder /app/exercicio1 .
-COPY --from=builder /app/exercicio2 .
+# Comando padrão para rodar a aplicação web
+CMD ["./app"]
 
-# Comando padrão para rodar o binário (pode ser alterado para um exercício específico)
-CMD ["./exercicio1"]
