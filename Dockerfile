@@ -1,19 +1,26 @@
-FROM golang:1.20-alpine
+# Etapa 1: Construir a aplicação
+FROM golang:1.20-alpine AS builder
 
+WORKDIR /app
 
-WORKDIR /GoApp
 
 COPY go.mod ./
-COPY go.sum ./
+COPY main.go ./
 
 
-RUN go mod download
+RUN go mod tidy
 
-
-COPY . .
-
-
+# Compilar o aplicativo Go
 RUN go build -o main .
+
+# Etapa 2: Executar a aplicação
+FROM alpine:latest
+
+
+WORKDIR /app
+
+
+COPY --from=builder /app/main .
 
 
 CMD ["./main"]
